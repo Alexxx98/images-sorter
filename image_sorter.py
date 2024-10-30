@@ -1,7 +1,7 @@
 import os
 import fnmatch
+import shutil
 
-from PIL import Image
 from collections import defaultdict
 
 
@@ -27,13 +27,13 @@ class ImageSorter:
                 for filename in fnmatch.filter(filenames, extension):
                     self.images_dict[os.path.basename(dirpath)].append(os.path.join(dirpath, filename))
                     self.image_counter += 1
+                    print(filename)
                     print(f'{self.image_counter} Images', end='\r')
 
 
     def move_images(self) -> None:
         os.chdir(self.images_dir)
 
-        counter = 0
         for dir_name, images in self.images_dict.items():
             try:
                 os.mkdir(dir_name)
@@ -41,15 +41,12 @@ class ImageSorter:
                 pass
 
             for image in images:
-                filepath = os.path.join(dir_name, image.split('\\')[-1])
+                destination = os.path.join(dir_name, image.split('\\')[-1])
                 try:
-                    img = Image.open(image)
-                    img.save(filepath)
-                except Exception:
+                    shutil.copy2(image, destination)
+                except PermissionError:
                     pass
-                counter += 1
-
-                print(f'Image: {counter}/{self.image_counter}', end='\r')
+        print('\nDone.')
 
 
 if __name__=='__main__':
